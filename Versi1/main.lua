@@ -1394,13 +1394,13 @@ InfoTab:CreateParagraph({
 })
 
 InfoTab:CreateButton({ 
-    Name = "Copy Instagram Link", 
+    Name = "Groub Telegram Link", 
     Callback = CreateSafeCallback(function() 
         if setclipboard then
-            setclipboard("https://instagram.com/_bangicoo") 
-            NotifySuccess("Social Media", "Instagram link copied! Follow for updates and support!")
+            setclipboard("https://t.me/spinner_xxx") 
+            NotifySuccess("Social Media", "Telegram link copied! Follow for updates and support!")
         else
-            NotifyInfo("Social Media", "Instagram: @_bangicoo")
+            NotifyInfo("Social Media", "Telegram: @Spinnerxxx")
         end
     end, "instagram")
 })
