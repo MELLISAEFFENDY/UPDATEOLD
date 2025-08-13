@@ -1380,17 +1380,17 @@ end
 print("XSAN: Creating INFO tab content...")
 InfoTab:CreateParagraph({
     Title = "XSAN Fish It Pro Ultimate v1.0",
-    Content = "The most advanced Fish It script ever created with AI-powered features, smart analytics, and premium automation systems.\n\nCreated by XSAN - Trusted by thousands of users worldwide!"
+    Content = "The most advanced Fish It script New Full Featurs "
 })
 
 InfoTab:CreateParagraph({
     Title = "Ultimate Features",
-    Content = "Quick Start Presets • Advanced Analytics • Smart Inventory Management • AI Fishing Assistant • Enhanced Safety Systems • Premium Automation • Quality of Life Features • Walk Speed Control • And Much More!"
+    Content = "Auto Fish,Teleport,Best Spot Fishing And More"
 })
 
 InfoTab:CreateParagraph({
     Title = "Follow XSAN",
-    Content = "Stay updated with the latest scripts and features!\n\nInstagram: @_bangicoo\nGitHub: github.com/codeico\n\nYour support helps us create better tools!"
+    Content = "Stay updated with the latest scripts and features Telegram @Spinner_xxx"
 })
 
 InfoTab:CreateButton({ 
