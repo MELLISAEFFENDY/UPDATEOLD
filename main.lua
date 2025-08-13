@@ -937,14 +937,16 @@ else
     print("XSAN: Island folder not found, using updated fallback coordinates")
     TeleportLocations.Islands = {
         -- Updated island coordinates from detector (Latest 2025)
-        ["Kohana Volcano"] = CFrame.new(-594.971252, 396.65213, 149.10907),
-        ["Crater Island"] = CFrame.new(1010.01001, 252, 5078.45117),
-        ["Kohana"] = CFrame.new(-650.971191, 208.693695, 711.10907),
-        ["Lost Isle"] = CFrame.new(-3618.15698, 240.836655, -1317.45801),
-        ["Stingray Shores"] = CFrame.new(45.2788086, 252.562927, 2987.10913),
-        ["Esoteric Depths"] = CFrame.new(1944.77881, 393.562927, 1371.35913),
+        ["Kohana Volcano"] = CFrame.new(-594.98, 40.86, 149.11),
+        ["Crater Island"] = CFrame.new(1010.01, 22.57, 5078.45),
+        ["Kohana"] = CFrame.new(-682.18, 3.04, 719.41),
+        ["Sisypus Statue"] = CFrame.new(-3746.41, -135.08, -1044.32),
+        ["Treasure Hall"] = CFrame.new(-3599.37, -271.69, -1530.96),
+        ["Stingray Shores"] = CFrame.new(45.27, 27.99, 2987.10),
+        ["Esoteric Depths"] = CFrame.new(2098.60, -29.01, 1352.55),
+        ["Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04),
         ["Weather Machine"] = CFrame.new(-1488.51196, 83.1732635, 1876.30298),
-        ["Tropical Grove"] = CFrame.new(-2095.34106, 197.199997, 3718.08008),
+        ["Tropical Grove"] = CFrame.new(-2095.34, 6.26, 3718.08),
         ["Coral Reefs"] = CFrame.new(-3023.97119, 337.812927, 2195.60913),
         -- Legacy coordinates (backup)
         ["Moosewood"] = CFrame.new(389, 137, 264),
