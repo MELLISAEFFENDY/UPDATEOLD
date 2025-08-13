@@ -225,7 +225,7 @@ local success, error = pcall(function()
     print("XSAN: Attempting to load UI...")
     
     -- Try ui_fixed.lua first (more stable)
-     local uiContent = game:HttpGet("https://raw.githubusercontent.com/MELLISAEFFENDY/UPDATEOLD/refs/heads/main/versi3/ui_fixed.lua")
+    local uiContent = game:HttpGet("https://raw.githubusercontent.com/MELLISAEFFENDY/UPDATEOLD/refs/heads/main/versi3/ui_fixed.lua", true)
     if uiContent and #uiContent > 0 then
         print("XSAN: Loading stable UI library...")
         print("XSAN: UI content length:", #uiContent)
@@ -240,13 +240,31 @@ local success, error = pcall(function()
             error("Failed to compile UI: " .. tostring(loadError))
         end
     else
-        error("Failed to fetch UI content")
+        print("XSAN: Trying fallback UI library...")
+        -- Fallback to Rayfield directly
+        Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield", true))()
+        if not Rayfield then
+            error("Failed to load fallback UI")
+        end
+        print("XSAN: Fallback UI loaded successfully!")
     end
 end)
 
 if not success then
     warn("XSAN Error: Failed to load Rayfield UI Library - " .. tostring(error))
-    return
+    -- Try alternative loading method
+    NotifyError("UI Error", "Primary UI failed. Attempting alternative method...")
+    
+    local backupSuccess = pcall(function()
+        Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield", true))()
+    end)
+    
+    if not backupSuccess or not Rayfield then
+        NotifyError("CRITICAL ERROR", "All UI loading methods failed! Script cannot continue.")
+        return
+    else
+        NotifySuccess("UI Recovery", "Backup UI loaded successfully!")
+    end
 end
 
 if not Rayfield then
@@ -596,7 +614,8 @@ task.spawn(function()
                     descendant.Text == "TELEPORT" or 
                     descendant.Text == "ANALYTICS" or 
                     descendant.Text == "INVENTORY" or 
-                    descendant.Text == "UTILITY"
+                    descendant.Text == "UTILITY" or
+                    descendant.Text == "WEATHER"
                 ) then
                     tabCount = tabCount + 1
                     print("XSAN: Found tab:", descendant.Text, "Visible:", descendant.Visible, "Transparency:", descendant.BackgroundTransparency)
@@ -1674,27 +1693,27 @@ end
 print("XSAN: Creating INFO tab content...")
 InfoTab:CreateParagraph({
     Title = XSAN_CONFIG.branding.title,
-    Content = XSAN_CONFIG.tabs.INFO.main_description
+    Content = XSAN_CONFIG.branding.subtitle
 })
 
 InfoTab:CreateParagraph({
-    Title = GetTabContent("INFO", "features_title"),
-    Content = GetTabContent("INFO", "features_list")
+    Title = "Ultimate Features",
+    Content = "Quick Start Presets • Advanced Analytics • Smart Inventory Management • AI Fishing Assistant • Enhanced Safety Systems • Premium Automation • Quality of Life Features • Walk Speed Control • And Much More!"
 })
 
 InfoTab:CreateParagraph({
-    Title = GetTabContent("INFO", "social_title"),
-    Content = GetTabContent("INFO", "social_description")
+    Title = "Follow XSAN", 
+    Content = "Stay updated with the latest scripts and features!\n\nInstagram: " .. XSAN_CONFIG.branding.instagram .. "\nGitHub: " .. XSAN_CONFIG.branding.github .. "\n\n" .. XSAN_CONFIG.branding.support_message
 })
 
 InfoTab:CreateButton({ 
     Name = "Copy Instagram Link", 
     Callback = CreateSafeCallback(function() 
         if setclipboard then
-            setclipboard(XSAN_CONFIG.branding.social.instagram_url) 
-            NotifySuccess("Social Media", GetNotificationMessage("social_copied", {platform = "Instagram"}))
+            setclipboard("https://instagram.com/_bangicoo") 
+            NotifySuccess("Social Media", "Instagram link copied! Follow for updates and support!")
         else
-            NotifyInfo("Social Media", "Instagram: " .. XSAN_CONFIG.branding.social.instagram_handle)
+            NotifyInfo("Social Media", "Instagram: " .. XSAN_CONFIG.branding.instagram)
         end
     end, "instagram")
 })
@@ -1703,10 +1722,10 @@ InfoTab:CreateButton({
     Name = "Copy GitHub Link", 
     Callback = CreateSafeCallback(function() 
         if setclipboard then
-            setclipboard(XSAN_CONFIG.branding.social.github_url) 
-            NotifySuccess("Social Media", GetNotificationMessage("social_copied", {platform = "GitHub"}))
+            setclipboard("https://github.com/codeico") 
+            NotifySuccess("Social Media", "GitHub link copied! Check out more premium scripts!")
         else
-            NotifyInfo("Social Media", "GitHub: " .. XSAN_CONFIG.branding.social.github_handle)
+            NotifyInfo("Social Media", "GitHub: " .. XSAN_CONFIG.branding.github)
         end
     end, "github")
 })
@@ -1816,8 +1835,8 @@ print("XSAN: INFO tab completed successfully!")
 
 print("XSAN: Creating PRESETS tab content...")
 PresetsTab:CreateParagraph({
-    Title = GetTabContent("PRESETS", "main_title"),
-    Content = GetTabContent("PRESETS", "main_description")
+    Title = "XSAN Quick Start Presets",
+    Content = "Instantly configure the script with optimal settings for different use cases. Perfect for beginners or quick setup!"
 })
 
 PresetsTab:CreateButton({
@@ -1863,8 +1882,8 @@ PresetsTab:CreateButton({
 })
 
 PresetsTab:CreateParagraph({
-    Title = GetTabContent("PRESETS", "autosell_title"),
-    Content = GetTabContent("PRESETS", "autosell_description")
+    Title = "Auto Sell Global Controls",
+    Content = "Global auto sell control - When you set Auto Sell ON/OFF, it will apply to ALL preset modes. This gives you master control over auto selling."
 })
 
 PresetsTab:CreateButton({
