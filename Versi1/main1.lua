@@ -344,9 +344,16 @@ do
     local statusLabel = nil
 
     local function updateStatus(txt, color)
-        if statusLabel then
-            statusLabel:Set("text", txt)
-            if color then statusLabel:Set("color", color) end
+        -- statusLabel is the Paragraph Frame returned by CreateParagraph.
+        -- It does NOT have a :Set() method. Its child named "Content" holds the text.
+        if statusLabel and statusLabel.Parent then
+            local contentLabel = statusLabel:FindFirstChild("Content")
+            if contentLabel and contentLabel:IsA("TextLabel") then
+                contentLabel.Text = txt
+                if color then
+                    contentLabel.TextColor3 = color
+                end
+            end
         end
     end
 
@@ -376,6 +383,12 @@ do
     WeatherTab:CreateParagraph({
         Title = "Weather Purchase",
         Content = "Gunakan untuk membeli event cuaca. Cloudy/Wind/Storm terverifikasi dari probe. Yang lain mungkin membutuhkan syarat khusus atau belum aktif."})
+
+    -- Small spacer to ensure next elements (dropdown) don't visually overlap first paragraph container
+    WeatherTab:CreateParagraph({
+        Title = " ",
+        Content = " "
+    })
 
     WeatherTab:CreateDropdown({
         Name = "Select Weather",
