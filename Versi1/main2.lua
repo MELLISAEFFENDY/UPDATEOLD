@@ -113,7 +113,7 @@ local success, error = pcall(function()
     print("XSAN: Attempting to load UI...")
     
     -- Try ui_fixed.lua first (more stable)
-     local uiContent = game:HttpGet("https://raw.githubusercontent.com/MELLISAEFFENDY/UPDATEOLD/refs/heads/main/Versi1/ui_fixed1.lua")
+     local uiContent = game:HttpGet("https://raw.githubusercontent.com/MELLISAEFFENDY/UPDATEOLD/refs/heads/main/Versi1/ui_fixed.lua")
     if uiContent and #uiContent > 0 then
         print("XSAN: Loading stable UI library...")
         print("XSAN: UI content length:", #uiContent)
@@ -357,12 +357,38 @@ do
         end
     end
 
+    local lastAttemptTimes = {}
+    local COOLDOWN_HINT = 5 -- seconds to locally throttle spam if server rejects
+    local function classifyResult(name, ret)
+        if ret == true or validSuccess[name] then
+            return true, "OK", Color3.fromRGB(120,200,120)
+        end
+        local txt = tostring(ret)
+        txt = txt == "nil" and "NoReturn" or txt
+        -- Heuristic classifications
+        if string.find(txt:lower(), "cooldown") or string.find(txt:lower(), "wait") then
+            return false, "Cooldown", Color3.fromRGB(200,180,90)
+        elseif string.find(txt:lower(), "not") and string.find(txt:lower(), "enough") then
+            return false, "Cost?", Color3.fromRGB(220,160,80)
+        elseif string.find(txt:lower(), "invalid") then
+            return false, "Invalid", Color3.fromRGB(220,120,120)
+        end
+        return false, txt, Color3.fromRGB(220,160,80)
+    end
+
     local function PurchaseWeather(name)
         if not weatherRemote then
-            updateStatus("Remote not found", Color3.fromRGB(220,120,120))
+            updateStatus("Remote missing", Color3.fromRGB(220,120,120))
             return false
         end
-        local ok,ret = pcall(function()
+        -- Local anti-spam throttle
+        local now = tick()
+        if lastAttemptTimes[name] and now - lastAttemptTimes[name] < 0.4 then
+            return false
+        end
+        lastAttemptTimes[name] = now
+
+        local ok, ret = pcall(function()
             if weatherRemote:IsA("RemoteFunction") then
                 return weatherRemote:InvokeServer(name)
             else
@@ -370,14 +396,17 @@ do
                 return nil
             end
         end)
-        if ok then
-            local success = ret == true or validSuccess[name] or false
-            updateStatus(string.format("%s -> %s", name, success and "OK" or tostring(ret)), success and Color3.fromRGB(120,200,120) or Color3.fromRGB(220,160,80))
-            return success
-        else
+        if not ok then
             updateStatus(name .. " error", Color3.fromRGB(220,120,120))
             return false
         end
+        local success, label, color = classifyResult(name, ret)
+        updateStatus(string.format("%s -> %s", name, label), color)
+        if not success and label == "Cooldown" then
+            -- Light local delay before next auto attempt when rotating
+            task.delay(COOLDOWN_HINT, function() end)
+        end
+        return success
     end
 
     WeatherTab:CreateParagraph({
@@ -1575,15 +1604,25 @@ end
 
 -- Auto Sell Function
 local function CheckAndAutoSell()
-    if autoSellOnThreshold and fishCaught >= autoSellThreshold then
-        pcall(function()
-            if not (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then return end
+    -- Simple guard clauses
+    if not autoSellOnThreshold then return end
+    if fishCaught < autoSellThreshold then return end
+
+    -- Debounce so we do not run overlapping sells (e.g. multiple fish processed same frame)
+    if _G.__XSAN_AutoSellBusy then return end
+    _G.__XSAN_AutoSellBusy = true
+
+    task.spawn(function()
+        local ok, err = pcall(function()
+            if not (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then
+                error("Character missing HumanoidRootPart")
+            end
 
             local npcContainer = ReplicatedStorage:FindFirstChild("NPC")
             local alexNpc = npcContainer and npcContainer:FindFirstChild("Alex")
 
             if not alexNpc then
-                NotifyError("Auto Sell", "NPC 'Alex' not found! Cannot auto sell.")
+                NotifyError("Auto Sell", "NPC 'Alex' not found!")
                 return
             end
 
@@ -1591,18 +1630,33 @@ local function CheckAndAutoSell()
             local npcPosition = alexNpc.WorldPivot.Position
 
             LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(npcPosition)
-            wait(1)
+            task.wait(0.75)
 
-            ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net["RF/SellAllItems"]:InvokeServer()
-            wait(1)
+            local sellRemote = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net:FindFirstChild("RF/SellAllItems")
+            if not sellRemote then
+                NotifyError("Auto Sell", "Sell remote missing")
+                return
+            end
 
-            LocalPlayer.Character.HumanoidRootPart.CFrame = originalCFrame
-            itemsSold = itemsSold + 1
-            fishCaught = 0
-            
-            NotifySuccess("Auto Sell", "Automatically sold items! Fish count: " .. autoSellThreshold .. " reached.")
+            local sellOk, sellResult = pcall(function()
+                return sellRemote:InvokeServer()
+            end)
+            if not sellOk then
+                NotifyError("Auto Sell", "Sell failed: " .. tostring(sellResult))
+            else
+                -- Attempt very small delay to ensure server processed transaction
+                task.wait(0.4)
+                LocalPlayer.Character.HumanoidRootPart.CFrame = originalCFrame
+                itemsSold += 1
+                fishCaught = 0
+                NotifySuccess("Auto Sell", "Sold inventory at " .. autoSellThreshold .. "+ fish. Result: " .. tostring(sellResult))
+            end
         end)
-    end
+        if not ok then
+            NotifyError("Auto Sell", "Runtime error: " .. tostring(err))
+        end
+        _G.__XSAN_AutoSellBusy = false
+    end)
 end
 
 -- ═══════════════════════════════════════════════════════════════
