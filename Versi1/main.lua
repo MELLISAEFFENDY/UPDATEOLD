@@ -37,8 +37,8 @@ local UIConfig = {
         useImage = false,
 
         -- Emoji icons (used when useImage = false)
-        emojiVisible = "🎣", -- when UI is visible
-        emojiHidden = "👁", -- when UI is hidden
+        emojiVisible = "🍀", -- when UI is visible
+        emojiHidden = "🍀", -- when UI is hidden
 
         -- Image icons (used when useImage = true). Replace with your asset IDs
         imageVisible = "rbxassetid://88814246774578",
@@ -54,7 +54,7 @@ local function Notify(title, text, duration)
             Title = title or "XSAN Fish It Pro",
             Text = text or "Notification", 
             Duration = duration,
-            Icon = "rbxassetid://6023426923"
+            Icon = "rbxassetid://88814246774578"
         })
     end)
     print("XSAN:", title, "-", text)
