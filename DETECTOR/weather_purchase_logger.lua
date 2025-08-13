@@ -302,6 +302,54 @@ do
 
         local selectedIndex = nil
 
+        -- Candidate remote scanner (weather/purchase keywords)
+        local function scanCandidateRemotes()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local found = {}
+            for _,inst in ipairs(ReplicatedStorage:GetDescendants()) do
+                if inst:IsA("RemoteEvent") or inst:IsA("RemoteFunction") then
+                    local n = inst.Name:lower()
+                    if n:find("weather") or n:find("purchase") then
+                        table.insert(found, inst)
+                    end
+                end
+            end
+            _G.WeatherLogger.CandidateRemotes = found
+            print("[WeatherPurchaseLogger][Scan] Ditemukan", #found, "remote kandidat (weather/purchase)")
+            for i,r in ipairs(found) do
+                print(string.format("  [%d] %s (%s)", i, r.Name, r.ClassName))
+            end
+            return found
+        end
+
+        -- Hook broadcast OnClientEvent once
+        local function hookBroadcasts()
+            if _G.WeatherLogger.BroadcastHooked then return end
+            local list = _G.WeatherLogger.CandidateRemotes or scanCandidateRemotes()
+            local hooked = 0
+            for _,r in ipairs(list) do
+                if r:IsA("RemoteEvent") then
+                    hooked += 1
+                    r.OnClientEvent:Connect(function(...)
+                        if not (_G.WeatherLogger and _G.WeatherLogger.Active) then return end
+                        local args = {...}
+                        -- Simpan sebagai capture tipe broadcast
+                        table.insert(_G.WeatherLogger.Captures, {
+                            remote = r,
+                            method = "OnClientEvent",
+                            args = args,
+                            returnValue = nil,
+                            time = 0,
+                            timestamp = os.time()
+                        })
+                        captureBlock(r, "OnClientEvent", args, nil, 0)
+                    end)
+                end
+            end
+            _G.WeatherLogger.BroadcastHooked = true
+            print("[WeatherPurchaseLogger][Broadcast] Hooked", hooked, "RemoteEvent OnClientEvent listener(s)")
+        end
+
         local function captureToString(cap)
             if not cap then return "" end
             local buf = {}
@@ -347,7 +395,9 @@ do
             scroller.CanvasSize = UDim2.new(0,0,0, listLayout.AbsoluteContentSize.Y + 10)
         end)
 
-        makeBtn("Refresh", Color3.fromRGB(80,130,200), 1, function()
+        makeBtn("Scan+Refresh", Color3.fromRGB(80,130,200), 1, function()
+            scanCandidateRemotes()
+            hookBroadcasts()
             rebuildList()
         end)
         makeBtn("Copy Sel", Color3.fromRGB(90,160,90), 2, function()
@@ -382,6 +432,10 @@ do
         floatBtn.MouseButton1Click:Connect(function()
             main.Visible = not main.Visible
             if main.Visible then
+                if not _G.WeatherLogger.CandidateRemotes then
+                    scanCandidateRemotes()
+                end
+                hookBroadcasts()
                 rebuildList()
             end
         end)
