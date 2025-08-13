@@ -1549,7 +1549,7 @@ local function ApplyPreset(presetName)
         autoRecastDelay = 0.5
         perfectCast = true
         safeMode = false
-        autoSellThreshold = 20
+        autoSellThreshold = 100
         autoSellOnThreshold = globalAutoSellEnabled  -- Use global setting
         NotifySuccess("Preset Applied", "Speed mode activated - Maximum fishing speed" .. (globalAutoSellEnabled and " (Auto Sell: ON)" or " (Auto Sell: OFF)"))
         
