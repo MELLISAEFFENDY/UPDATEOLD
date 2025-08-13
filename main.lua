@@ -1110,7 +1110,10 @@ TeleportLocations.Events = {
     ["🌟 Isonade Event"] = CFrame.new(-1442, 135, 1006),
     ["🦈 Great White Event"] = CFrame.new(1082, 124, -924),
     ["❄️ Whale Event"] = CFrame.new(2648, 140, 2522),
-    ["🔥 Volcano Event"] = CFrame.new(-1888, 164, 330)
+    ["🔥 Volcano Event"] = CFrame.new(-1888, 164, 330),
+	["⚜️ Sisypus Statue"] = CFrame.new(-3746.41, -135.08, -1044.32),
+    ["⚜ Treasure Hall"] = CFrame.new(-3599.37, -271.69, -1530.96),
+    ["🌑 Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04)
 }
 
 -- Safe Teleportation Function
