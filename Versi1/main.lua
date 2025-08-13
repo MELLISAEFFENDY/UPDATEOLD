@@ -1390,7 +1390,7 @@ InfoTab:CreateParagraph({
 
 InfoTab:CreateParagraph({
     Title = "Follow XSAN",
-    Content = "Stay updated with the latest scripts and features Telegram @Spinner_xxx"
+    Content = "Stay updated with the latest scripts and features Telegram Groub t.me/Spinner_xxx"
 })
 
 InfoTab:CreateButton({ 
@@ -1406,13 +1406,13 @@ InfoTab:CreateButton({
 })
 
 InfoTab:CreateButton({ 
-    Name = "Copy GitHub Link", 
+    Name = "Link Telegram", 
     Callback = CreateSafeCallback(function() 
         if setclipboard then
-            setclipboard("https://github.com/codeico") 
-            NotifySuccess("Social Media", "GitHub link copied! Check out more premium scripts!")
+            setclipboard("https://t.me/Spinner_xxx") 
+            NotifySuccess("Social Media", "Telegram Check out more premium scripts!")
         else
-            NotifyInfo("Social Media", "GitHub: github.com/codeico")
+            NotifyInfo("Social Media", "Telegram: t.me/spinner_xxx")
         end
     end, "github")
 })
