@@ -32,6 +32,21 @@ end
 
 -- Services
 local TweenService = getService("TweenService")
+-- Safe tween wrapper to prevent crashes when incorrect args passed
+local function safeTween(instance, info, props)
+	if typeof(instance) ~= "Instance" then
+		warn("[XSAN UI] Invalid tween target (not Instance):", instance)
+		return {Play=function() end}
+	end
+	local ok, tw = pcall(function()
+		return TweenService:Create(instance, info, props)
+	end)
+	if not ok then
+		warn("[XSAN UI] Tween creation failed:", tw)
+		return {Play=function() end}
+	end
+	return tw
+end
 local UserInputService = getService("UserInputService")
 local GuiService = getService("GuiService")
 local RunService = getService("RunService")
@@ -1126,20 +1141,20 @@ function Rayfield:CreateWindow(Settings)
 
 			-- Button hover effects
 			Button.MouseEnter:Connect(function()
-				TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
-				TweenService:Create(ButtonStroke, TweenInfo.new(0.2), {Transparency = 0.2}):Play()
+				safeTween(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
+				safeTween(ButtonStroke, TweenInfo.new(0.2), {Transparency = 0.2}):Play()
 			end)
 
 			Button.MouseLeave:Connect(function()
-				TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
-				TweenService:Create(ButtonStroke, TweenInfo.new(0.2), {Transparency = 0.5}):Play()
+				safeTween(Button, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+				safeTween(ButtonStroke, TweenInfo.new(0.2), {Transparency = 0.5}):Play()
 			end)
 
 			-- Button click
 			Button.MouseButton1Click:Connect(function()
-				TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(100, 100, 100)}):Play()
+				safeTween(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(100, 100, 100)}):Play()
 				task.wait(0.1)
-				TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
+				safeTween(Button, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
 				ButtonSettings.Callback()
 			end)
 
@@ -1207,7 +1222,7 @@ function Rayfield:CreateWindow(Settings)
 			local function Toggle()
 				ToggleSettings.CurrentValue = not ToggleSettings.CurrentValue
 				ToggleButton.Text = ToggleSettings.CurrentValue and "ON" or "OFF"
-				TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
+				safeTween(ToggleButton, TweenInfo.new(0.2), {
 					BackgroundColor3 = ToggleSettings.CurrentValue and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(200, 100, 100)
 				}):Play()
 				ToggleSettings.Callback(ToggleSettings.CurrentValue)
