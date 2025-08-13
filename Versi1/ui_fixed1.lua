@@ -570,6 +570,21 @@ function Rayfield:CreateWindow(Settings)
 		table.insert(Tabs, Tab)
 		Tab.Content = TabContent
 
+		-- Compatibility: some scripts call Tab:CreateParagraph directly (without creating a Section first).
+		-- Provide a lightweight wrapper that auto-creates (and reuses) a hidden default section.
+		if not Tab.CreateParagraph then
+			function Tab:__EnsureDefaultSection()
+				if not self.__XSAN_DefaultSection then
+					self.__XSAN_DefaultSection = self:CreateSection(self.Name .. " Main")
+				end
+				return self.__XSAN_DefaultSection
+			end
+			function Tab:CreateParagraph(Settings)
+				local section = self:__EnsureDefaultSection()
+				return section:CreateParagraph(Settings)
+			end
+		end
+
 		-- Tab functions
 		function Tab:CreateSection(Name)
 			local Section = {}
