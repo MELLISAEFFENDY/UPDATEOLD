@@ -458,6 +458,86 @@ print("XSAN: ExitTab created")
 print("XSAN: All tabs created successfully!")
 
 -- ═══════════════════════════════════════════════════════════════
+-- TAB CONTENT FIXING SYSTEM
+-- Ensure all tabs are properly loaded with content
+-- ═══════════════════════════════════════════════════════════════
+
+local function ForceRefreshAllTabs()
+    print("XSAN: Force refreshing all tab contents...")
+    
+    -- Delay to ensure UI is fully loaded
+    task.spawn(function()
+        task.wait(2)
+        
+        -- Force refresh each tab by accessing them
+        pcall(function()
+            if InfoTab then print("XSAN: INFO tab accessible") end
+            if PresetsTab then print("XSAN: PRESETS tab accessible") end
+            if MainTab then print("XSAN: AUTO FISH tab accessible") end
+            if TeleportTab then print("XSAN: TELEPORT tab accessible") end
+            if AnalyticsTab then print("XSAN: ANALYTICS tab accessible") end
+            if InventoryTab then print("XSAN: INVENTORY tab accessible") end
+            if UtilityTab then print("XSAN: UTILITY tab accessible") end
+            if WeatherTab then print("XSAN: WEATHER tab accessible") end
+            if RandomFishTab then print("XSAN: RANDOM FISH tab accessible") end
+            if ExitTab then print("XSAN: EXIT tab accessible") end
+        end)
+        
+        -- Force UI refresh and content loading
+        pcall(function()
+            local rayfieldGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("RayfieldLibrary") or game.CoreGui:FindFirstChild("RayfieldLibrary")
+            if rayfieldGui then
+                print("XSAN: Forcing UI refresh...")
+                
+                -- Force refresh all tab containers and content
+                for _, descendant in pairs(rayfieldGui:GetDescendants()) do
+                    if descendant:IsA("Frame") and descendant.Name:find("Tab") then
+                        descendant.Visible = true
+                        -- Force content to be visible
+                        for _, child in pairs(descendant:GetDescendants()) do
+                            if child:IsA("GuiObject") then
+                                child.Visible = true
+                            end
+                        end
+                        print("XSAN: Refreshed tab frame:", descendant.Name)
+                    elseif descendant:IsA("ScrollingFrame") then
+                        descendant.ScrollBarThickness = 8
+                        descendant.AutomaticCanvasSize = Enum.AutomaticSize.Y
+                        descendant.CanvasSize = UDim2.new(0, 0, 0, 0)
+                        -- Force refresh scrolling content
+                        for _, child in pairs(descendant:GetChildren()) do
+                            if child:IsA("GuiObject") then
+                                child.Visible = true
+                            end
+                        end
+                        print("XSAN: Fixed scrolling frame")
+                    elseif descendant:IsA("TextButton") or descendant:IsA("TextLabel") or descendant:IsA("Frame") then
+                        descendant.Visible = true
+                    end
+                end
+                
+                -- Special handling for tab switching
+                local tabContainer = rayfieldGui:FindFirstChild("TabContainer", true)
+                if tabContainer then
+                    for _, tab in pairs(tabContainer:GetChildren()) do
+                        if tab:IsA("TextButton") then
+                            tab.Visible = true
+                            print("XSAN: Ensured tab button visible:", tab.Text or tab.Name)
+                        end
+                    end
+                end
+            end
+        end)
+        
+        print("XSAN: Tab refresh completed!")
+        NotifySuccess("Tab Refresh", "✅ TAB REFRESH COMPLETED!\n\nAll tabs should now be visible with content.\nIf still empty, try Emergency Reload.")
+    end)
+end
+
+-- Initialize tab refresh
+ForceRefreshAllTabs()
+
+-- ═══════════════════════════════════════════════════════════════
 -- WEATHER TAB - Weather Purchase System
 -- Based on probe results: Cloudy/Wind/Storm returned true; others false.
 -- ═══════════════════════════════════════════════════════════════
@@ -1414,13 +1494,13 @@ end
 
 -- Event Locations (Moved above NPCs for better organization)
 TeleportLocations.Events = {
-    ["🦈 Ice Spot"] = CFrame.new(1990.55, 3.09, 3021.91),
-    ["🦈 Crater Spot"] = CFrame.new(990.45, 21.06, 5059.85),
-    ["🦈 Stone Spot"] = CFrame.new(-2636.19, 124.87, -27.49),
-    ["🦈 Tropical Spot"] = CFrame.new(-2093.80, 6.26, 3654.30),
-	["🦈 Sisypus Statue"] = CFrame.new(-3730.62, -101.13, -951.52),
-    ["🦈 Treasure Hall"] = CFrame.new(-3542.26, -279.08, -1663.14),
-    ["🦈 Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04)
+    ["🌟 Isonade Event"] = CFrame.new(-1442, 135, 1006),
+    ["🦈 Great White Event"] = CFrame.new(1082, 124, -924),
+    ["❄️ Whale Event"] = CFrame.new(2648, 140, 2522),
+    ["🔥 Volcano Event"] = CFrame.new(-1888, 164, 330),
+	["⚜️ Sisypus Statue"] = CFrame.new(-3746.41, -135.08, -1044.32),
+    ["⚜ Treasure Hall"] = CFrame.new(-3599.37, -271.69, -1530.96),
+    ["🌑 Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04)
 }
 
 -- Player Teleportation Function (improved like old.lua)
@@ -2133,6 +2213,11 @@ InfoTab:CreateParagraph({
     Content = "• Auto Fishing dengan AI patterns\n• Teleportasi ke semua lokasi\n• Smart inventory & auto sell\n• Analytics & statistics\n• Safety & anti-detection\n• Mobile optimized UI"
 })
 
+InfoTab:CreateParagraph({
+    Title = "🔧 Jika Tab Kosong/Hilang",
+    Content = "Jika tab AUTO FISH, TELEPORT, ANALYTICS, INVENTORY, UTILITY, atau RANDOM FISH terlihat kosong:\n\n1. Klik 'Fix All Tabs' di bawah\n2. Tunggu 3 detik\n3. Cek semua tab satu per satu\n4. Jika masih kosong, reload script"
+})
+
 InfoTab:CreateButton({ 
     Name = "Copy Instagram Link", 
     Callback = CreateSafeCallback(function() 
@@ -2252,6 +2337,62 @@ InfoTab:CreateButton({
     Callback = CreateSafeCallback(function() 
         NotifyInfo("Theme Change", "🎨 Available Themes:\n• Ocean (Current)\n• Default\n• Amethyst\n• DarkBlue\n\n⚠️ Reload script to change theme\n💡 Try different themes if tabs appear black")
     end, "change_theme")
+})
+
+InfoTab:CreateButton({ 
+    Name = "� Check Tab Status", 
+    Callback = CreateSafeCallback(function() 
+        local tabStatus = ""
+        local tabs = {
+            {"INFO", InfoTab},
+            {"PRESETS", PresetsTab},
+            {"AUTO FISH", MainTab},
+            {"TELEPORT", TeleportTab},
+            {"ANALYTICS", AnalyticsTab},
+            {"INVENTORY", InventoryTab},
+            {"UTILITY", UtilityTab},
+            {"WEATHER", WeatherTab},
+            {"RANDOM FISH", RandomFishTab},
+            {"EXIT", ExitTab}
+        }
+        
+        for _, tabInfo in pairs(tabs) do
+            local name, tab = tabInfo[1], tabInfo[2]
+            if tab then
+                tabStatus = tabStatus .. "✅ " .. name .. ": OK\n"
+            else
+                tabStatus = tabStatus .. "❌ " .. name .. ": MISSING\n"
+            end
+        end
+        
+        NotifyInfo("Tab Status", "📋 TAB STATUS REPORT:\n\n" .. tabStatus .. "\n💡 If any tab shows MISSING, use Emergency Reload")
+    end, "check_tab_status")
+})
+
+InfoTab:CreateButton({ 
+    Name = "�🔄 Fix All Tabs", 
+    Callback = CreateSafeCallback(function() 
+        ForceRefreshAllTabs()
+        NotifySuccess("Tab Fix", "🔄 FORCING TAB REFRESH!\n\n✅ Refreshing all tab contents\n✅ Fixing scrolling issues\n✅ Ensuring visibility\n\n💡 Wait 3 seconds then check all tabs")
+    end, "force_refresh_tabs")
+})
+
+InfoTab:CreateButton({ 
+    Name = "🚨 Emergency: Reload Script", 
+    Callback = CreateSafeCallback(function() 
+        NotifyInfo("Script Reload", "🚨 RELOADING SCRIPT IN 3 SECONDS!\n\n⚠️ This will close current UI\n✅ Script will restart fresh\n🔄 All tabs will be recreated\n\n💡 Use this if tabs are still empty")
+        task.wait(3)
+        -- Close current UI
+        pcall(function()
+            local rayfieldGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("RayfieldLibrary") or game.CoreGui:FindFirstChild("RayfieldLibrary")
+            if rayfieldGui then rayfieldGui:Destroy() end
+            local floatingGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("XSAN_FloatingButton") or game.CoreGui:FindFirstChild("XSAN_FloatingButton")
+            if floatingGui then floatingGui:Destroy() end
+        end)
+        task.wait(1)
+        -- Reload script
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/MELLISAEFFENDY/UPDATEOLD/refs/heads/main/versi3/main1.lua", true))()
+    end, "emergency_reload")
 })
 
 print("XSAN: INFO tab completed successfully!")
