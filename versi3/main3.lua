@@ -1091,6 +1091,18 @@ local randomSpotThread = nil
 local currentRandomSpot = "None"
 local lastRandomSpotChange = 0
 
+-- Random Spot Selection System
+local selectedSpots = {
+    ["🏝️ SISYPUS"] = true,
+    ["🦈 TREASURE"] = true,
+    ["🎣 STRINGRY"] = true,
+    ["❄️ ICE LAND"] = true,
+    ["🌋 CRATER"] = true,
+    ["🌴 TROPICAL"] = true,
+    ["🗿 STONE"] = true,
+    ["⚙️ MACHINE"] = true
+}
+
 -- Feature states
 local featureState = {
     AutoSell = false,
@@ -1671,7 +1683,10 @@ print("XSAN: Using dynamic location system like old.lua for accuracy")
 local function GetRandomSpot()
     local spots = {}
     for spotName, cframe in pairs(TeleportLocations.RandomSpots) do
-        table.insert(spots, {name = spotName, cframe = cframe})
+        -- Only include selected spots
+        if selectedSpots[spotName] then
+            table.insert(spots, {name = spotName, cframe = cframe})
+        end
     end
     
     if #spots > 0 then
@@ -1679,6 +1694,17 @@ local function GetRandomSpot()
         return spots[randomIndex]
     end
     return nil
+end
+
+-- Function to get selected spots count
+local function GetSelectedSpotsCount()
+    local count = 0
+    for spotName, isSelected in pairs(selectedSpots) do
+        if isSelected then
+            count = count + 1
+        end
+    end
+    return count
 end
 
 -- Function to start random spot fishing
@@ -2703,8 +2729,20 @@ RandomSpotTab:CreateToggle({
                 return
             end
             
+            -- Check if at least one spot is selected
+            local selectedCount = GetSelectedSpotsCount()
+            if selectedCount == 0 then
+                NotifyError("Random Spot", "❌ Pilih minimal 1 spot terlebih dahulu!\n\n💡 Centang checkbox spot yang ingin digunakan di bawah")
+                -- Reset toggle
+                if Rayfield.Flags["RandomSpotToggle"] then
+                    Rayfield.Flags["RandomSpotToggle"]:Set(false)
+                end
+                randomSpotEnabled = false
+                return
+            end
+            
             StartRandomSpotFishing()
-            NotifySuccess("Random Spot", "🎲 RANDOM SPOT FISHING ACTIVATED!\n\n✅ Auto teleport enabled\n⏰ Interval: " .. randomSpotInterval .. " minutes\n🎣 8 premium fishing spots\n\n🚀 Enjoy automated fishing!")
+            NotifySuccess("Random Spot", "🎲 RANDOM SPOT FISHING ACTIVATED!\n\n✅ Auto teleport enabled\n⏰ Interval: " .. randomSpotInterval .. " minutes\n🎣 " .. selectedCount .. " spots selected\n\n🚀 Enjoy automated fishing!")
         else
             StopRandomSpotFishing()
         end
@@ -2723,21 +2761,217 @@ RandomSpotTab:CreateSlider({
     end
 })
 
+-- Spot Selection Section
+RandomSpotTab:CreateParagraph({
+    Title = "🎯 Select Fishing Spots",
+    Content = "Pilih spot mana saja yang ingin digunakan untuk random fishing. Minimal 1 spot harus dipilih."
+})
+
+-- Create toggles for each spot
+RandomSpotTab:CreateToggle({
+    Name = "🏝️ SISYPUS Statue",
+    CurrentValue = selectedSpots["🏝️ SISYPUS"],
+    Flag = "SpotSisypus",
+    Callback = function(value)
+        selectedSpots["🏝️ SISYPUS"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "🏝️ SISYPUS: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "🦈 TREASURE Hall",
+    CurrentValue = selectedSpots["🦈 TREASURE"],
+    Flag = "SpotTreasure",
+    Callback = function(value)
+        selectedSpots["🦈 TREASURE"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "🦈 TREASURE: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "🎣 STRINGRY Area",
+    CurrentValue = selectedSpots["🎣 STRINGRY"],
+    Flag = "SpotStringry",
+    Callback = function(value)
+        selectedSpots["🎣 STRINGRY"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "🎣 STRINGRY: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "❄️ ICE LAND",
+    CurrentValue = selectedSpots["❄️ ICE LAND"],
+    Flag = "SpotIceLand",
+    Callback = function(value)
+        selectedSpots["❄️ ICE LAND"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "❄️ ICE LAND: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "🌋 CRATER Zone",
+    CurrentValue = selectedSpots["🌋 CRATER"],
+    Flag = "SpotCrater",
+    Callback = function(value)
+        selectedSpots["🌋 CRATER"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "🌋 CRATER: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "🌴 TROPICAL Island",
+    CurrentValue = selectedSpots["🌴 TROPICAL"],
+    Flag = "SpotTropical",
+    Callback = function(value)
+        selectedSpots["🌴 TROPICAL"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "🌴 TROPICAL: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "🗿 STONE Monument",
+    CurrentValue = selectedSpots["🗿 STONE"],
+    Flag = "SpotStone",
+    Callback = function(value)
+        selectedSpots["🗿 STONE"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "🗿 STONE: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+RandomSpotTab:CreateToggle({
+    Name = "⚙️ MACHINE Station",
+    CurrentValue = selectedSpots["⚙️ MACHINE"],
+    Flag = "SpotMachine",
+    Callback = function(value)
+        selectedSpots["⚙️ MACHINE"] = value
+        local selectedCount = GetSelectedSpotsCount()
+        NotifyInfo("Spot Selection", "⚙️ MACHINE: " .. (value and "✅ Selected" or "❌ Deselected") .. "\n\n📊 Total selected: " .. selectedCount .. " spots")
+    end
+})
+
+-- Quick Selection Buttons
+RandomSpotTab:CreateButton({
+    Name = "✅ Select All Spots",
+    Callback = CreateSafeCallback(function()
+        for spotName, _ in pairs(selectedSpots) do
+            selectedSpots[spotName] = true
+        end
+        
+        -- Update all UI toggles
+        local flagMapping = {
+            ["🏝️ SISYPUS"] = "SpotSisypus",
+            ["🦈 TREASURE"] = "SpotTreasure", 
+            ["🎣 STRINGRY"] = "SpotStringry",
+            ["❄️ ICE LAND"] = "SpotIceLand",
+            ["🌋 CRATER"] = "SpotCrater",
+            ["🌴 TROPICAL"] = "SpotTropical",
+            ["🗿 STONE"] = "SpotStone",
+            ["⚙️ MACHINE"] = "SpotMachine"
+        }
+        
+        for spotName, flagName in pairs(flagMapping) do
+            if Rayfield.Flags[flagName] then
+                Rayfield.Flags[flagName]:Set(true)
+            end
+        end
+        
+        NotifySuccess("Quick Selection", "✅ ALL SPOTS SELECTED!\n\n🎣 All 8 fishing spots are now active\n🎲 Maximum variety for random fishing\n⚡ Ready for ultimate fishing experience!")
+    end, "select_all_spots")
+})
+
+RandomSpotTab:CreateButton({
+    Name = "❌ Deselect All Spots", 
+    Callback = CreateSafeCallback(function()
+        for spotName, _ in pairs(selectedSpots) do
+            selectedSpots[spotName] = false
+        end
+        
+        -- Update all UI toggles
+        local flagMapping = {
+            ["🏝️ SISYPUS"] = "SpotSisypus",
+            ["🦈 TREASURE"] = "SpotTreasure",
+            ["🎣 STRINGRY"] = "SpotStringry", 
+            ["❄️ ICE LAND"] = "SpotIceLand",
+            ["🌋 CRATER"] = "SpotCrater",
+            ["🌴 TROPICAL"] = "SpotTropical",
+            ["🗿 STONE"] = "SpotStone",
+            ["⚙️ MACHINE"] = "SpotMachine"
+        }
+        
+        for spotName, flagName in pairs(flagMapping) do
+            if Rayfield.Flags[flagName] then
+                Rayfield.Flags[flagName]:Set(false)
+            end
+        end
+        
+        NotifyInfo("Quick Selection", "❌ ALL SPOTS DESELECTED!\n\n🚫 No spots selected\n💡 Select at least 1 spot before enabling random fishing")
+    end, "deselect_all_spots")
+})
+
+RandomSpotTab:CreateButton({
+    Name = "🎯 Select Premium Spots Only",
+    Callback = CreateSafeCallback(function()
+        -- Reset all first
+        for spotName, _ in pairs(selectedSpots) do
+            selectedSpots[spotName] = false
+        end
+        
+        -- Select only premium spots
+        local premiumSpots = {"🏝️ SISYPUS", "🦈 TREASURE", "🌋 CRATER", "❄️ ICE LAND"}
+        for _, spotName in pairs(premiumSpots) do
+            selectedSpots[spotName] = true
+        end
+        
+        -- Update UI toggles
+        local flagMapping = {
+            ["🏝️ SISYPUS"] = "SpotSisypus",
+            ["🦈 TREASURE"] = "SpotTreasure",
+            ["🎣 STRINGRY"] = "SpotStringry",
+            ["❄️ ICE LAND"] = "SpotIceLand", 
+            ["🌋 CRATER"] = "SpotCrater",
+            ["🌴 TROPICAL"] = "SpotTropical",
+            ["🗿 STONE"] = "SpotStone",
+            ["⚙️ MACHINE"] = "SpotMachine"
+        }
+        
+        for spotName, flagName in pairs(flagMapping) do
+            if Rayfield.Flags[flagName] then
+                Rayfield.Flags[flagName]:Set(selectedSpots[spotName])
+            end
+        end
+        
+        NotifySuccess("Premium Selection", "🎯 PREMIUM SPOTS SELECTED!\n\n✨ Selected: SISYPUS, TREASURE, CRATER, ICE LAND\n🏆 Best spots for rare fish and high value catches\n💎 Quality over quantity!")
+    end, "select_premium_spots")
+})
+
 RandomSpotTab:CreateButton({
     Name = "📍 Show Available Spots",
     Callback = CreateSafeCallback(function()
         local spotsList = "🎲 AVAILABLE RANDOM SPOTS:\n\n"
         local spotCount = 0
+        local selectedCount = 0
         
         for spotName, cframe in pairs(TeleportLocations.RandomSpots) do
             spotCount = spotCount + 1
             local pos = cframe.Position
-            spotsList = spotsList .. string.format("🎣 %s\n   Coordinates: %.1f, %.1f, %.1f\n\n", spotName, pos.X, pos.Y, pos.Z)
+            local status = selectedSpots[spotName] and "✅ SELECTED" or "❌ NOT SELECTED"
+            if selectedSpots[spotName] then
+                selectedCount = selectedCount + 1
+            end
+            spotsList = spotsList .. string.format("🎣 %s - %s\n   Coordinates: %.1f, %.1f, %.1f\n\n", spotName, status, pos.X, pos.Y, pos.Z)
         end
         
         spotsList = spotsList .. "📊 Total Spots: " .. spotCount .. "\n"
+        spotsList = spotsList .. "✅ Selected: " .. selectedCount .. " spots\n"
         spotsList = spotsList .. "🎲 Random selection every " .. randomSpotInterval .. " minutes\n"
-        spotsList = spotsList .. "✅ Premium fishing locations!"
+        spotsList = spotsList .. "💡 Use checkboxes above to select/deselect spots!"
         
         NotifyInfo("Random Spots", spotsList)
     end, "show_spots")
@@ -2759,11 +2993,23 @@ RandomSpotTab:CreateButton({
 RandomSpotTab:CreateButton({
     Name = "📊 Current Session Info",
     Callback = CreateSafeCallback(function()
+        local selectedCount = GetSelectedSpotsCount()
         local sessionInfo = "🎲 RANDOM SPOT SESSION INFO:\n\n"
         sessionInfo = sessionInfo .. "Status: " .. (randomSpotEnabled and "🟢 ACTIVE" or "🔴 INACTIVE") .. "\n"
         sessionInfo = sessionInfo .. "Current Spot: " .. currentRandomSpot .. "\n"
         sessionInfo = sessionInfo .. "Interval: " .. randomSpotInterval .. " minutes\n"
-        sessionInfo = sessionInfo .. "Total Spots: 8 premium locations\n\n"
+        sessionInfo = sessionInfo .. "Selected Spots: " .. selectedCount .. "/8 locations\n\n"
+        
+        -- Show selected spots
+        if selectedCount > 0 then
+            sessionInfo = sessionInfo .. "✅ ACTIVE SPOTS:\n"
+            for spotName, isSelected in pairs(selectedSpots) do
+                if isSelected then
+                    sessionInfo = sessionInfo .. "   • " .. spotName .. "\n"
+                end
+            end
+            sessionInfo = sessionInfo .. "\n"
+        end
         
         if randomSpotEnabled then
             local timeElapsed = math.floor((tick() - lastRandomSpotChange) / 60)
@@ -3451,12 +3697,19 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
                 randomSpotEnabled = false
                 NotifyError("Hotkey", "❌ Auto fishing must be enabled first! (F11)\n\n💡 Press F1 to enable auto fishing, then F11 for random spots")
             else
-                StartRandomSpotFishing()
-                -- Update UI if available
-                if Rayfield.Flags["RandomSpotToggle"] then
-                    Rayfield.Flags["RandomSpotToggle"]:Set(true)
+                -- Check if at least one spot is selected
+                local selectedCount = GetSelectedSpotsCount()
+                if selectedCount == 0 then
+                    randomSpotEnabled = false
+                    NotifyError("Hotkey", "❌ No spots selected! (F11)\n\n💡 Open RANDOM SPOT tab and select at least 1 spot first")
+                else
+                    StartRandomSpotFishing()
+                    -- Update UI if available
+                    if Rayfield.Flags["RandomSpotToggle"] then
+                        Rayfield.Flags["RandomSpotToggle"]:Set(true)
+                    end
+                    NotifySuccess("Hotkey", "🎲 Random Spot Fishing STARTED! (F11)\n\n✅ Auto location switching active\n🎯 " .. selectedCount .. " spots selected\n⏰ Interval: " .. randomSpotInterval .. " minutes")
                 end
-                NotifySuccess("Hotkey", "🎲 Random Spot Fishing STARTED! (F11)\n\n✅ Auto location switching active\n⏰ Interval: " .. randomSpotInterval .. " minutes")
             end
         else
             StopRandomSpotFishing()
