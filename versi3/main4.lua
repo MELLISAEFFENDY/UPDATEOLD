@@ -1428,14 +1428,14 @@ TeleportLocations.Events = {
     ["🦈 Stone Spot"] = CFrame.new(-2636.19, 124.87, -27.49),
     ["🦈 Tropical Spot"] = CFrame.new(-2093.80, 6.26, 3654.30),
 	["🦈 Sisypus Statue"] = CFrame.new(-3730.62, -101.13, -951.52),
-    ["🦈 Treasure Hall"] = CFrame.new(-3547.19, -279.08, -1668.35),
+    ["🦈 Treasure Hall"] = CFrame.new(-3599.90, -275.96, -1640.84),
     ["🦈 Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04)
 }
 
 -- Random Spot Fishing Locations for Auto Random Fishing
 TeleportLocations.RandomSpots = {
     ["🏝️ SISYPUS"] = CFrame.new(-3730.62, -101.13, -951.52),
-    ["🦈 TREASURE"] = CFrame.new(-3547.19, -279.08, -1668.35),
+    ["🦈 TREASURE"] = CFrame.new(-3599.90, -275.96, -1640.84),
     ["🎣 STRINGRY"] = CFrame.new(102.05, 29.64, 3054.35),
     ["❄️ ICE LAND"] = CFrame.new(1990.55, 3.09, 3021.91),
     ["🌋 CRATER"] = CFrame.new(990.45, 21.06, 5059.85),
