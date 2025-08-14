@@ -26,11 +26,10 @@ local CONFIG = {
     }
 }
 
-local success, error = pcall(function()
-
 -- Check if GUI already exists and destroy it
 if game.Players.LocalPlayer.PlayerGui:FindFirstChild(CONFIG.GUI_NAME) then
     game.Players.LocalPlayer.PlayerGui[CONFIG.GUI_NAME]:Destroy()
+    print("🗑️ Destroyed existing GUI")
 end
 
 -- ===================================================================
@@ -72,22 +71,61 @@ local SecurityStats = {
 -- ===================================================================
 --                        REMOTE REFERENCES
 -- ===================================================================
-local EquipRod = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RE/EquipToolFromHotbar"]
-local UnEquipRod = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RE/UnequipToolFromHotbar"]
-local RequestFishing = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RF/RequestFishingMinigameStarted"]
-local ChargeRod = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RF/ChargeFishingRod"]
-local FishingComplete = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RE/FishingCompleted"]
-local CancelFishing = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RF/CancelFishingInputs"]
-local spawnBoat = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RF/SpawnBoat"]
-local despawnBoat = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RF/DespawnBoat"]
-local sellAll = Rs.Packages._Index["sleitnick_net@0.2.0"].net["RF/SellAllItems"]
+-- Safe remote loading with error handling
+local EquipRod, UnEquipRod, RequestFishing, ChargeRod, FishingComplete, CancelFishing, spawnBoat, despawnBoat, sellAll
+
+local function loadRemotes()
+    local success, err = pcall(function()
+        print("🔄 Loading remote references...")
+        local Rs = game:GetService("ReplicatedStorage")
+        local netFolder = Rs:WaitForChild("Packages", 5):WaitForChild("_Index", 5):WaitForChild("sleitnick_net@0.2.0", 5):WaitForChild("net", 5)
+        
+        EquipRod = netFolder:FindFirstChild("RE/EquipToolFromHotbar")
+        UnEquipRod = netFolder:FindFirstChild("RE/UnequipToolFromHotbar")
+        RequestFishing = netFolder:FindFirstChild("RF/RequestFishingMinigameStarted")
+        ChargeRod = netFolder:FindFirstChild("RF/ChargeFishingRod")
+        FishingComplete = netFolder:FindFirstChild("RE/FishingCompleted")
+        CancelFishing = netFolder:FindFirstChild("RF/CancelFishingInputs")
+        spawnBoat = netFolder:FindFirstChild("RF/SpawnBoat")
+        despawnBoat = netFolder:FindFirstChild("RF/DespawnBoat")
+        sellAll = netFolder:FindFirstChild("RF/SellAllItems")
+        
+        print("✅ Remote references loaded successfully")
+    end)
+    
+    if not success then
+        warn("⚠️ Failed to load remotes:", err)
+        print("🔧 Script will continue without remote functionality")
+    end
+end
+
+-- Try to load remotes, but don't fail if unsuccessful
+loadRemotes()
 
 -- External scripts
-local noOxygen = loadstring(game:HttpGet("https://pastebin.com/raw/JS7LaJsa"))()
+local noOxygen = nil
+pcall(function()
+    noOxygen = loadstring(game:HttpGet("https://pastebin.com/raw/JS7LaJsa"))()
+end)
 
--- Workspace references
-local tpFolder = workspace["!!!! ISLAND LOCATIONS !!!!"]
-local charFolder = workspace.Characters
+-- Workspace references with error handling
+local tpFolder = nil
+local charFolder = nil
+
+pcall(function()
+    tpFolder = workspace:FindFirstChild("!!!! ISLAND LOCATIONS !!!!")
+    charFolder = workspace:FindFirstChild("Characters")
+end)
+
+if not tpFolder then
+    warn("⚠️ Island locations folder not found in workspace")
+    -- Create fallback empty folder reference to prevent errors
+    tpFolder = {GetChildren = function() return {} end}
+end
+
+if not charFolder then
+    warn("⚠️ Characters folder not found in workspace")
+end
 
 -- Event Locations (Same as main.lua)
 local EventLocations = {
@@ -223,10 +261,16 @@ local function randomWait()
     return math.random(CONFIG.FISHING_DELAYS.MIN * 1000, CONFIG.FISHING_DELAYS.MAX * 1000) / 1000
 end
 
-local function safeCall(func)
+local function safeCall(func, funcName)
     local success, result = pcall(func)
     if not success then
-        warn("Error: " .. tostring(result))
+        local errorMsg = funcName and ("Error in " .. funcName .. ": " .. tostring(result)) or ("Error: " .. tostring(result))
+        warn(errorMsg)
+        
+        -- Also show notification to user
+        if createNotification then
+            createNotification("❌ Error: " .. (funcName or "Unknown"), Color3.fromRGB(255, 0, 0))
+        end
     end
     return success, result
 end
@@ -912,11 +956,15 @@ end
 --                       GUI CREATION
 -- ===================================================================
 local function createCompleteGUI()
+    print("🎮 Creating Complete GUI...")
+    
     -- Create main ScreenGui
     local ZayrosFISHIT = Instance.new("ScreenGui")
     ZayrosFISHIT.Name = CONFIG.GUI_NAME
     ZayrosFISHIT.Parent = player:WaitForChild("PlayerGui")
     ZayrosFISHIT.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    print("✅ ScreenGui created:", ZayrosFISHIT.Name)
 
     -- Main Frame
     local FrameUtama = Instance.new("Frame")
@@ -927,6 +975,8 @@ local function createCompleteGUI()
     FrameUtama.BorderSizePixel = 0
     FrameUtama.Position = UDim2.new(0.264, 0, 0.174, 0)
     FrameUtama.Size = UDim2.new(0.542, 0, 0.650, 0)
+    
+    print("✅ Main Frame created")
     
     local UICorner = Instance.new("UICorner")
     UICorner.Parent = FrameUtama
@@ -3703,6 +3753,8 @@ local function createCompleteGUI()
     print("📊 Analytics: Fish Rarity Tracking, Money Counter, Performance Stats")
 
     return ZayrosFISHIT
+
+    return ZayrosFISHIT
 end
 
 -- ===================================================================
@@ -3710,12 +3762,67 @@ end
 -- ===================================================================
 
 local function initialize()
-    loadSettings()
-    createCompleteGUI()
+    print("🚀 Initializing GamerXsan FISHIT V2.0...")
+    
+    -- First try loading settings (non-critical)
+    local success1, error1 = pcall(loadSettings)
+    if not success1 then
+        warn("⚠️ Failed to load settings:", error1)
+        print("🔧 Continuing without saved settings...")
+    else
+        print("✅ Settings loaded successfully")
+    end
+    
+    -- Then try creating GUI (critical)
+    print("🎮 Attempting to create GUI...")
+    local success2, error2 = pcall(createCompleteGUI)
+    if not success2 then
+        warn("❌ Failed to create GUI:", error2)
+        
+        -- Try a simpler GUI as fallback
+        print("🔄 Attempting fallback GUI...")
+        local success3, error3 = pcall(function()
+            local simpleGui = Instance.new("ScreenGui")
+            simpleGui.Name = CONFIG.GUI_NAME .. "_Fallback"
+            simpleGui.Parent = player.PlayerGui
+            
+            local frame = Instance.new("Frame")
+            frame.Parent = simpleGui
+            frame.Size = UDim2.new(0.3, 0, 0.2, 0)
+            frame.Position = UDim2.new(0.35, 0, 0.4, 0)
+            frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            
+            local label = Instance.new("TextLabel")
+            label.Parent = frame
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.BackgroundTransparency = 1
+            label.Text = "GUI Error - Check Console"
+            label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            label.TextScaled = true
+            
+            print("✅ Fallback GUI created")
+        end)
+        
+        if not success3 then
+            warn("❌ Even fallback GUI failed:", error3)
+            return false
+        end
+        return false
+    else
+        print("✅ GUI created successfully")
+        return true
+    end
 end
 
 -- Start the script
-initialize()
+print("🎮 Starting GamerXsan FISHIT V2.0...")
+local initSuccess = initialize()
+
+if initSuccess then
+    print("🎉 Script initialized successfully!")
+else
+    warn("❌ Script initialization failed!")
+end
 
 -- Handle player leaving
 connections[#connections + 1] = Players.PlayerRemoving:Connect(function(leavingPlayer)
@@ -3731,10 +3838,4 @@ connections[#connections + 1] = Players.PlayerRemoving:Connect(function(leavingP
     end
 end)
 
-end) -- End of main pcall
-
-if not success then
-    warn("❌ Script failed to load: " .. tostring(error))
-else
-    print("🎉 Script loaded successfully!")
-end
+print("🎉 GamerXsan FISHIT V2.0 loaded successfully!")
