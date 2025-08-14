@@ -5,6 +5,9 @@
 -- ██                                                          ██
 -- ██████████████████████████████████████████████████████████████
 
+print("🚀 GamerXsan FISHIT V2.0 starting...")
+print("📋 Script loaded at:", os.date("%X"))
+
 -- ===================================================================
 --                          CONFIGURATION
 -- ===================================================================
@@ -26,15 +29,10 @@ local CONFIG = {
     }
 }
 
--- Check if GUI already exists and destroy it
-if game.Players.LocalPlayer.PlayerGui:FindFirstChild(CONFIG.GUI_NAME) then
-    game.Players.LocalPlayer.PlayerGui[CONFIG.GUI_NAME]:Destroy()
-    print("🗑️ Destroyed existing GUI")
-end
-
 -- ===================================================================
 --                            SERVICES
 -- ===================================================================
+print("🔧 Loading services...")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -47,6 +45,52 @@ local Rs = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 local connections = {}
 local isHidden = false
+
+print("✅ Services loaded successfully")
+
+-- Check if GUI already exists and destroy it
+if player.PlayerGui:FindFirstChild(CONFIG.GUI_NAME) then
+    player.PlayerGui[CONFIG.GUI_NAME]:Destroy()
+    print("🗑️ Destroyed existing GUI")
+end
+
+-- IMMEDIATE TEST: Try creating a simple test GUI first
+print("🧪 Testing basic GUI creation...")
+local testSuccess, testError = pcall(function()
+    local testGui = Instance.new("ScreenGui")
+    testGui.Name = "BasicTest"
+    testGui.Parent = player.PlayerGui
+    
+    local testFrame = Instance.new("Frame")
+    testFrame.Parent = testGui
+    testFrame.Size = UDim2.new(0.2, 0, 0.1, 0)
+    testFrame.Position = UDim2.new(0.8, 0, 0, 0)
+    testFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    
+    local testLabel = Instance.new("TextLabel")
+    testLabel.Parent = testFrame
+    testLabel.Size = UDim2.new(1, 0, 1, 0)
+    testLabel.BackgroundTransparency = 1
+    testLabel.Text = "TEST OK"
+    testLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    testLabel.TextScaled = true
+    
+    print("✅ Basic GUI test successful - Green box should be visible")
+    
+    -- Auto-remove after 3 seconds
+    task.wait(3)
+    if testGui and testGui.Parent then
+        testGui:Destroy()
+        print("🗑️ Test GUI removed")
+    end
+end)
+
+if not testSuccess then
+    warn("❌ Basic GUI test failed:", testError)
+    warn("⚠️ Cannot create GUIs - This indicates a fundamental issue")
+else
+    print("✅ Basic GUI creation works - Proceeding with main script")
+end
 
 -- ===================================================================
 --                        SECURITY FEATURES
@@ -3816,12 +3860,19 @@ end
 
 -- Start the script
 print("🎮 Starting GamerXsan FISHIT V2.0...")
+print("⏳ Please wait while initializing...")
 local initSuccess = initialize()
 
 if initSuccess then
     print("🎉 Script initialized successfully!")
+    print("🔧 GUI should now be visible")
+    print("🎮 Use F9 to toggle hide/show")
+    print("📋 If GUI is not visible, check the troubleshooting guide")
 else
     warn("❌ Script initialization failed!")
+    warn("🔧 Please check console messages above for specific errors")
+    warn("📋 Try the ultra_simple.lua script for basic testing")
+    warn("🔄 You may need to restart Roblox Studio/Game")
 end
 
 -- Handle player leaving
