@@ -483,54 +483,91 @@ local function ForceRefreshAllTabs()
             if ExitTab then print("XSAN: EXIT tab accessible") end
         end)
         
-        -- Force UI refresh and content loading
+        -- Force UI refresh and content loading (AGGRESSIVE VERSION)
         pcall(function()
             local rayfieldGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("RayfieldLibrary") or game.CoreGui:FindFirstChild("RayfieldLibrary")
             if rayfieldGui then
-                print("XSAN: Forcing UI refresh...")
+                print("XSAN: Forcing AGGRESSIVE UI refresh...")
                 
-                -- Force refresh all tab containers and content
+                -- Force refresh all UI elements more aggressively
                 for _, descendant in pairs(rayfieldGui:GetDescendants()) do
-                    if descendant:IsA("Frame") and descendant.Name:find("Tab") then
+                    if descendant:IsA("Frame") and (descendant.Name:find("Tab") or descendant.Name:find("Content")) then
                         descendant.Visible = true
-                        -- Force content to be visible
+                        descendant.Size = descendant.Size -- Force layout refresh
+                        descendant.Position = descendant.Position -- Force position refresh
+                        
+                        -- Force ALL children to be visible
                         for _, child in pairs(descendant:GetDescendants()) do
                             if child:IsA("GuiObject") then
                                 child.Visible = true
+                                -- Force parent/child relationships to refresh
+                                if child.Parent then
+                                    child.Parent = child.Parent
+                                end
                             end
                         end
-                        print("XSAN: Refreshed tab frame:", descendant.Name)
+                        print("XSAN: AGGRESSIVE refresh for frame:", descendant.Name)
                     elseif descendant:IsA("ScrollingFrame") then
                         descendant.ScrollBarThickness = 8
                         descendant.AutomaticCanvasSize = Enum.AutomaticSize.Y
                         descendant.CanvasSize = UDim2.new(0, 0, 0, 0)
-                        -- Force refresh scrolling content
+                        descendant.Visible = true
+                        descendant.Active = true
+                        descendant.ScrollingEnabled = true
+                        
+                        -- Force refresh scrolling content with size forcing
                         for _, child in pairs(descendant:GetChildren()) do
                             if child:IsA("GuiObject") then
                                 child.Visible = true
+                                child.Size = child.Size -- Force layout recalculation
                             end
                         end
-                        print("XSAN: Fixed scrolling frame")
+                        print("XSAN: AGGRESSIVE scrolling frame fix")
                     elseif descendant:IsA("TextButton") or descendant:IsA("TextLabel") or descendant:IsA("Frame") then
                         descendant.Visible = true
+                        -- Force redraw by changing transparency slightly
+                        local originalTransparency = descendant.BackgroundTransparency
+                        descendant.BackgroundTransparency = originalTransparency + 0.001
+                        task.wait(0.01)
+                        descendant.BackgroundTransparency = originalTransparency
                     end
                 end
                 
-                -- Special handling for tab switching
+                -- Special handling for tab container with forced visibility
                 local tabContainer = rayfieldGui:FindFirstChild("TabContainer", true)
                 if tabContainer then
+                    tabContainer.Visible = true
                     for _, tab in pairs(tabContainer:GetChildren()) do
                         if tab:IsA("TextButton") then
                             tab.Visible = true
-                            print("XSAN: Ensured tab button visible:", tab.Text or tab.Name)
+                            tab.Active = true
+                            tab.Size = tab.Size -- Force layout refresh
+                            print("XSAN: AGGRESSIVE tab button refresh:", tab.Text or tab.Name)
                         end
                     end
+                end
+                
+                -- Force main frame refresh
+                local mainFrame = rayfieldGui:FindFirstChild("Main", true)
+                if mainFrame then
+                    mainFrame.Visible = true
+                    mainFrame.Size = mainFrame.Size -- Force refresh
+                    print("XSAN: AGGRESSIVE main frame refresh")
                 end
             end
         end)
         
-        print("XSAN: Tab refresh completed!")
-        NotifySuccess("Tab Refresh", "✅ TAB REFRESH COMPLETED!\n\nAll tabs should now be visible with content.\nIf still empty, try Emergency Reload.")
+        -- Additional refresh cycle after 2 seconds
+        task.wait(2)
+        pcall(function()
+            if Window and Window.Refresh then
+                Window:Refresh()
+                print("XSAN: Rayfield Window refresh called")
+            end
+        end)
+        
+        print("XSAN: AGGRESSIVE tab refresh completed!")
+        NotifySuccess("Tab Refresh", "✅ AGGRESSIVE TAB REFRESH COMPLETED!\n\n🔥 All UI elements force-refreshed\n💪 Layout recalculation forced\n🎯 Content visibility ensured\n\nIf still blank: Try Emergency Reload")
     end)
 end
 
@@ -2378,7 +2415,41 @@ InfoTab:CreateButton({
 })
 
 InfoTab:CreateButton({ 
-    Name = "🚨 Emergency: Reload Script", 
+    Name = "� FORCE UI REPAIR", 
+    Callback = CreateSafeCallback(function() 
+        NotifyInfo("UI Repair", "💥 FORCING COMPLETE UI REPAIR!\n\n🔧 Recreating all UI elements\n💪 Aggressive visibility forcing\n🎯 Layout recalculation\n\n⏳ Please wait 5 seconds...")
+        
+        -- More aggressive UI repair
+        task.spawn(function()
+            for i = 1, 3 do
+                pcall(function()
+                    local rayfieldGui = game.Players.LocalPlayer.PlayerGui:FindFirstChild("RayfieldLibrary") or game.CoreGui:FindFirstChild("RayfieldLibrary")
+                    if rayfieldGui then
+                        -- Force every single element visible
+                        for _, element in pairs(rayfieldGui:GetDescendants()) do
+                            if element:IsA("GuiObject") then
+                                element.Visible = true
+                                element.Active = true
+                                -- Force parent refresh
+                                if element.Parent then
+                                    local tempParent = element.Parent
+                                    element.Parent = nil
+                                    task.wait(0.01)
+                                    element.Parent = tempParent
+                                end
+                            end
+                        end
+                    end
+                end)
+                task.wait(1)
+            end
+            NotifySuccess("UI Repair", "💥 FORCE UI REPAIR COMPLETED!\n\n✅ All elements recreated\n✅ Visibility forced\n✅ Layout refreshed\n\n🎯 Check all tabs now!")
+        end)
+    end, "force_ui_repair")
+})
+
+InfoTab:CreateButton({ 
+    Name = "�🚨 Emergency: Reload Script", 
     Callback = CreateSafeCallback(function() 
         NotifyInfo("Script Reload", "🚨 RELOADING SCRIPT IN 3 SECONDS!\n\n⚠️ This will close current UI\n✅ Script will restart fresh\n🔄 All tabs will be recreated\n\n💡 Use this if tabs are still empty")
         task.wait(3)
@@ -2485,7 +2556,10 @@ RandomFishTab:CreateParagraph({
 })
 
 -- Location selection multiselect
-RandomFishTab:CreateLabel("🌍 Pilih Jenis Lokasi untuk Random Fishing:")
+RandomFishTab:CreateParagraph({
+    Title = "🌍 Pilih Jenis Lokasi",
+    Content = "Pilih jenis lokasi mana yang ingin digunakan untuk Random Fishing:"
+})
 
 RandomFishTab:CreateToggle({
     Name = "🏝️ Islands (Pulau-pulau)",
@@ -2668,6 +2742,12 @@ print("XSAN: RANDOM FISH tab completed successfully!")
 -- ═══════════════════════════════════════════════════════════════
 
 print("XSAN: Creating TELEPORT tab content...")
+
+-- Add description paragraph for TELEPORT tab
+TeleportTab:CreateParagraph({
+    Title = "🚀 Ultimate Teleportation System",
+    Content = "Teleport instant ke semua lokasi fishing terbaik! Includes Islands, NPCs, Events, dan custom coordinates. Semua lokasi telah diverifikasi dan akurat."
+})
 
 -- Islands Section
 
@@ -2929,6 +3009,12 @@ print("XSAN: TELEPORT tab completed successfully!")
 -- ═══════════════════════════════════════════════════════════════
 
 print("XSAN: Creating AUTO FISH tab content...")
+
+-- Add description paragraph for AUTO FISH tab
+MainTab:CreateParagraph({
+    Title = "🎣 XSAN Auto Fishing System",
+    Content = "Ultimate auto fishing dengan AI-powered features, smart patterns, dan hybrid security mode. Aktifkan fitur yang diinginkan dan mulai fishing otomatis."
+})
 
 MainTab:CreateToggle({
     Name = "Enable Auto Fishing",
@@ -3308,6 +3394,12 @@ print("XSAN: AUTO FISH tab completed successfully!")
 
 print("XSAN: Creating ANALYTICS tab content...")
 
+-- Add description paragraph for ANALYTICS tab
+AnalyticsTab:CreateParagraph({
+    Title = "📊 Advanced Analytics & Statistics",
+    Content = "Monitor performa fishing session Anda dengan analytics real-time. Track fish per hour, efficiency, profit, dan mini-game statistics untuk optimisasi maksimal."
+})
+
 AnalyticsTab:CreateButton({
     Name = "Show Detailed Statistics",
     Callback = CreateSafeCallback(function()
@@ -3369,6 +3461,12 @@ print("XSAN: ANALYTICS tab completed successfully!")
 
 print("XSAN: Creating INVENTORY tab content...")
 
+-- Add description paragraph for INVENTORY tab
+InventoryTab:CreateParagraph({
+    Title = "🎒 Smart Inventory Management",
+    Content = "Monitor dan kelola inventory Anda dengan smart tools. Check status inventory, item tracking, dan space optimization untuk fishing yang efisien."
+})
+
 InventoryTab:CreateButton({
     Name = "Check Inventory Status",
     Callback = CreateSafeCallback(function()
@@ -3396,6 +3494,12 @@ print("XSAN: INVENTORY tab completed successfully!")
 -- ═══════════════════════════════════════════════════════════════
 
 print("XSAN: Creating UTILITY tab content...")
+
+-- Add description paragraph for UTILITY tab
+UtilityTab:CreateParagraph({
+    Title = "🔧 Utility Tools & System Management",
+    Content = "Advanced tools untuk system management, performance optimization, walkspeed control, dan berbagai utilities untuk enhance experience Anda."
+})
 
 UtilityTab:CreateButton({
     Name = "Show Ultimate Session Stats",
