@@ -1414,13 +1414,13 @@ end
 
 -- Event Locations (Moved above NPCs for better organization)
 TeleportLocations.Events = {
-    ["🌟 Isonade Event"] = CFrame.new(-1442, 135, 1006),
-    ["🦈 Great White Event"] = CFrame.new(1082, 124, -924),
-    ["❄️ Whale Event"] = CFrame.new(2648, 140, 2522),
-    ["🔥 Volcano Event"] = CFrame.new(-1888, 164, 330),
-	["⚜️ Sisypus Statue"] = CFrame.new(-3746.41, -135.08, -1044.32),
-    ["⚜ Treasure Hall"] = CFrame.new(-3599.37, -271.69, -1530.96),
-    ["🌑 Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04)
+    ["🦈 Ice Spot"] = CFrame.new(1990.55, 3.09, 3021.91),
+    ["🦈 Crater Spot"] = CFrame.new(990.45, 21.06, 5059.85),
+    ["🦈 Stone Spot"] = CFrame.new(-2636.19, 124.87, -27.49),
+    ["🦈 Tropical Spot"] = CFrame.new(-2093.80, 6.26, 3654.30),
+	["🦈 Sisypus Statue"] = CFrame.new(-3730.62, -101.13, -951.52),
+    ["🦈 Treasure Hall"] = CFrame.new(-3542.26, -279.08, -1663.14),
+    ["🦈 Enchant Stone"] = CFrame.new(3237.61, -1302.33, 1398.04)
 }
 
 -- Player Teleportation Function (improved like old.lua)
